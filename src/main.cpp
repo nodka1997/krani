@@ -5,14 +5,16 @@ const int motorCW = 4;
 const int valveClose = 14;
 const int valveOpen = 12;
 const int btnValveOpen = 13;
-const int btnValveClose = 15;
-
-void resetState();
+const int btnValveClose = 16;
+void controlValve(int valveState);
+unsigned long measureOpenTime();
+unsigned long measureCloseTime();
 
 void setup()
 {
 
   Serial.begin(9600);
+  Serial.println();
   pinMode(motorCCW, OUTPUT);
   pinMode(motorCW, OUTPUT);
   pinMode(valveClose, INPUT);
@@ -20,24 +22,60 @@ void setup()
   pinMode(btnValveOpen, INPUT);
   pinMode(btnValveClose, INPUT);
 
-  Serial.println("above resetState()");
-  resetState();
-  Serial.println("below resetState()");
+  Serial.println(measureOpenTime());
+  Serial.println(measureCloseTime());
 }
 
 void loop()
 {
-
 }
 
-void resetState()
+void controlValve(int valveState) // 0 - daketilia 1- giaa
 {
-  Serial.println(digitalRead(valveClose));
+  if (valveState == 0)
+  {
+    //close
+    while (digitalRead(valveOpen) == 1)
+    {
+      digitalWrite(motorCW, 1);
+      yield();
+    }
+    digitalWrite(motorCW, 0);
+  }
+  else
+  {
+    //open
+    while (digitalRead(valveClose) == 1)
+    {
+      digitalWrite(motorCCW, 1);
+      yield();
+    }
+    digitalWrite(motorCCW, 0);
+  }
+}
+
+unsigned long measureOpenTime()
+{
+  controlValve(0);
+  unsigned long startTime = millis();
+  digitalWrite(motorCCW, 1);
   while (digitalRead(valveClose) == 1)
   {
-    Serial.println("looping");
-    digitalWrite(btnValveClose, 1);
+    yield();
   }
+  digitalWrite(motorCCW, 0);
+  return millis() - startTime;
+}
 
-  digitalWrite(btnValveClose, 0);
+unsigned long measureCloseTime()
+{
+  controlValve(1);
+  unsigned long startTime = millis();
+  digitalWrite(motorCW, 1);
+  while (digitalRead(valveOpen) == 1)
+  {
+    yield();
+  }
+  digitalWrite(motorCW, 0);
+  return millis() - startTime;
 }
