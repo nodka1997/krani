@@ -17,38 +17,9 @@ void setup()
   pinMode(btnValveOpen, INPUT);
   pinMode(btnValveClose, INPUT);
 
-  //adlivghfouhdoas
 }
 
 void loop()
 {
-
-  if (digitalRead(btnValveOpen) == LOW)
-  {
-    digitalWrite(motorCCW, HIGH);
-  }
-  else
-  {
-    digitalWrite(motorCCW, LOW);
-  }
-
-  if (digitalRead(btnValveClose) == LOW)
-  {
-    digitalWrite(motorCW, HIGH);
-  }
-  else
-  {
-    digitalWrite(motorCW, LOW);
-  }
-
-  if (digitalRead(valveOpen) == digitalRead(btnValveOpen))
-  {
-    digitalWrite(motorCCW, LOW);
-  }
-
-  if (digitalRead(valveClose) == digitalRead(btnValveClose))
-  {
-    digitalWrite(motorCW, LOW);
-  }
 
 }
