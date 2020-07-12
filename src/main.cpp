@@ -16,7 +16,6 @@ void setup()
   pinMode(valveOpen, INPUT);
   pinMode(btnValveOpen, INPUT);
   pinMode(btnValveClose, INPUT);
-  sdfsdfs
 }
 
 void loop()
