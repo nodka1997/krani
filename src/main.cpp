@@ -6,33 +6,33 @@ const int valveClose = 14;
 const int valveOpen = 12;
 const int btnValveOpen = 13;
 const int btnValveClose = 16;
-void controlValve(int valveState);
-unsigned long measureOpenTime();
-unsigned long measureCloseTime();
 
-void setup()
+unsigned long openTime = 0;
+unsigned long closeTime = 0;
+float currentStatePercent = 0;
+
+void openValveToPercentage(float toPercent)
 {
-
-  Serial.begin(9600);
-  Serial.println();
-  pinMode(motorCCW, OUTPUT);
-  pinMode(motorCW, OUTPUT);
-  pinMode(valveClose, INPUT);
-  pinMode(valveOpen, INPUT);
-  pinMode(btnValveOpen, INPUT);
-  pinMode(btnValveClose, INPUT);
-
-  Serial.println(measureOpenTime());
-  Serial.println(measureCloseTime());
+  if (currentStatePercent > toPercent)
+  {
+    // daketva
+    digitalWrite(motorCW, 1);
+    delay(closeTime * (currentStatePercent - toPercent));
+    digitalWrite(motorCW, 0);
+  }
+  else
+  {
+    // gageba
+    digitalWrite(motorCCW, 1);
+    delay(openTime * (toPercent - currentStatePercent));
+    digitalWrite(motorCCW, 0);
+  }
+  currentStatePercent = toPercent;
 }
 
-void loop()
+void resetValveToOpenOrClose(bool valveState) // 0 - daketilia 1- giaa
 {
-}
-
-void controlValve(int valveState) // 0 - daketilia 1- giaa
-{
-  if (valveState == 0)
+  if (valveState)
   {
     //close
     while (digitalRead(valveOpen) == 1)
@@ -56,7 +56,7 @@ void controlValve(int valveState) // 0 - daketilia 1- giaa
 
 unsigned long measureOpenTime()
 {
-  controlValve(0);
+  resetValveToOpenOrClose(true);
   unsigned long startTime = millis();
   digitalWrite(motorCCW, 1);
   while (digitalRead(valveClose) == 1)
@@ -69,7 +69,7 @@ unsigned long measureOpenTime()
 
 unsigned long measureCloseTime()
 {
-  controlValve(1);
+  resetValveToOpenOrClose(false);
   unsigned long startTime = millis();
   digitalWrite(motorCW, 1);
   while (digitalRead(valveOpen) == 1)
@@ -78,4 +78,31 @@ unsigned long measureCloseTime()
   }
   digitalWrite(motorCW, 0);
   return millis() - startTime;
+}
+
+void setup()
+{
+
+  Serial.begin(9600);
+  Serial.println();
+  pinMode(motorCCW, OUTPUT);
+  pinMode(motorCW, OUTPUT);
+  pinMode(valveClose, INPUT);
+  pinMode(valveOpen, INPUT);
+  pinMode(btnValveOpen, INPUT);
+  pinMode(btnValveClose, INPUT);
+
+  openTime = measureOpenTime();
+  closeTime = measureCloseTime();
+  currentStatePercent = 0;
+
+  openValveToPercentage(0.5);
+  delay(3000);
+  openValveToPercentage(0.7);
+  delay(3000);
+  openValveToPercentage(0.2);
+}
+
+void loop()
+{
 }
