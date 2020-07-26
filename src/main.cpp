@@ -1,7 +1,8 @@
 #include <Arduino.h>
 
-const int motorCCW = 5;
-const int motorCW = 4;
+//https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/
+const int motorCCW = 0;
+const int motorCW = 2;
 const int valveClose = 14;
 const int valveOpen = 12;
 const int btnValveOpen = 13;
@@ -17,14 +18,14 @@ void openValveToPercentage(float toPercent)
   {
     // daketva
     digitalWrite(motorCW, 1);
-    delay(closeTime * (currentStatePercent - toPercent));
+    delay((closeTime * (currentStatePercent - toPercent)) * 0.8);
     digitalWrite(motorCW, 0);
   }
   else
   {
     // gageba
     digitalWrite(motorCCW, 1);
-    delay(openTime * (toPercent - currentStatePercent));
+    delay((openTime * (toPercent - currentStatePercent)) * 0.8);
     digitalWrite(motorCCW, 0);
   }
   currentStatePercent = toPercent;
@@ -96,13 +97,30 @@ void setup()
   closeTime = measureCloseTime();
   currentStatePercent = 0;
 
-  openValveToPercentage(0.5);
-  delay(3000);
-  openValveToPercentage(0.7);
-  delay(3000);
-  openValveToPercentage(0.2);
+  Serial.println("ready");
+
+  // openValveToPercentage(0.5);
+  // delay(3000);
+  // openValveToPercentage(0.7);
+  // delay(3000);
+  // openValveToPercentage(0.2);
 }
 
 void loop()
 {
+  if (digitalRead(btnValveOpen) == 0)
+  {
+    float request = 0.1;
+    if (currentStatePercent < 0.2)
+    {
+      request = 0.2;
+    }
+
+    openValveToPercentage(currentStatePercent + request);
+  }
+
+  if (digitalRead(btnValveClose) == 0)
+  {
+    openValveToPercentage(currentStatePercent - 0.1);
+  }
 }
